@@ -307,7 +307,6 @@
     <div class="flex flex-wrap justify-center gap-6">
       
       <a href="#" class="group block w-full sm:w-[360px] rounded-2xl border border-navy-100 bg-navy-50/40 p-8 text-center hover:shadow-xl hover:-translate-y-1 hover:border-gold-300 transition-all focus:outline-none focus:ring-2 focus:ring-gold-400">
-        <!-- Блок з фотографією -->
         <div class="w-36 h-36 mx-auto rounded-full border-4 border-white shadow-md overflow-hidden mb-6 group-hover:border-gold-300 transition-colors bg-navy-100">
           <img src="director.png" alt="Познякова Анжела Павлівна" class="w-full h-full object-cover object-top">
         </div>
@@ -377,7 +376,7 @@
 <!-- FOOTER / CONTACTS -->
 <footer id="contacts" class="constellation-bg">
   <div class="max-w-6xl mx-auto px-5 sm:px-8 py-16 sm:py-20">
-    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-12">
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
 
       <div>
         <div class="flex items-center gap-3 mb-4">
@@ -403,6 +402,23 @@
           <li class="flex items-start gap-3">
             <i class="fa-solid fa-envelope mt-1 text-gold-400"></i>
             <a href="mailto:licej.suziria.1952@gmail.com" class="hover:text-white transition-colors break-all">licej.suziria.1952@gmail.com</a>
+          </li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="text-gold-400 font-semibold tracking-wide uppercase text-sm mb-5">Соцмережі та чати</h3>
+        <ul class="space-y-4 text-navy-100/90 text-sm">
+          <li class="flex items-start gap-3">
+            <i class="fa-brands fa-telegram mt-1 text-gold-400 text-lg"></i>
+            <div class="flex flex-col gap-1.5">
+              <a href="https://t.me/+n63iCPi0DQoxMDE6" target="_blank" class="hover:text-white transition-colors">Офіційний канал ліцею</a>
+              <a href="https://t.me/+u4Tzvgi8inNjMWQy" target="_blank" class="hover:text-white transition-colors">Чат для спілкування</a>
+            </div>
+          </li>
+          <li class="flex items-start gap-3">
+            <i class="fa-brands fa-facebook mt-1 text-gold-400 text-lg"></i>
+            <a href="https://www.facebook.com/share/1AzFTv78BV/" target="_blank" class="hover:text-white transition-colors mt-0.5">Сторінка Facebook</a>
           </li>
         </ul>
       </div>
@@ -483,6 +499,26 @@
     link.addEventListener('click', closeMenu);
   });
 
+  // Escaping and Linkifying functions
+  function escapeHTML(str) {
+    if (!str) return '';
+    return str.replace(/[&<>'"]/g, tag => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      "'": '&#39;',
+      '"': '&quot;'
+    }[tag]));
+  }
+
+  function linkify(text) {
+    const escapedText = escapeHTML(text);
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    return escapedText.replace(urlRegex, function(url) {
+      return '<a href="' + url + '" target="_blank" class="text-blue-600 hover:text-blue-800 underline break-all font-medium">' + url + '</a>';
+    });
+  }
+
   // Modal logic
   const modal = document.getElementById('news-modal');
   let globalNewsData = [];
@@ -493,14 +529,15 @@
 
     const rawDate = row[0] || '';
     const title = row[1] || '';
-    const text = row[2] || '';
+    const rawText = row[2] || '';
     const photoUrl = row[3] || '';
 
     const date = rawDate.split(' ')[0] || rawDate;
 
     document.getElementById('modal-date').innerHTML = `<i class="fa-regular fa-calendar"></i> ${date}`;
     document.getElementById('modal-title').textContent = title;
-    document.getElementById('modal-text').textContent = text;
+    // Injecting HTML here so the linkify a-tags work
+    document.getElementById('modal-text').innerHTML = linkify(rawText);
 
     const imgContainer = document.getElementById('modal-image-container');
     const imgEl = document.getElementById('modal-image');
@@ -588,10 +625,11 @@
       latestNews.forEach((row, index) => {
         const rawDate = row[0] || '';
         const title = row[1] || 'Без заголовка';
-        const text = row[2] || '';
+        const rawText = row[2] || '';
         const photoUrl = row[3] || '';
 
         const date = rawDate.split(' ')[0] || rawDate;
+        const textPreview = escapeHTML(rawText);
 
         let imageHtml = `
           <div class="h-48 bg-gradient-to-br from-navy-700 to-navy-900 flex items-center justify-center relative shrink-0">
@@ -622,7 +660,7 @@
                 ${date}
               </span>
               <h3 class="font-display font-semibold text-navy-800 text-lg mt-3 leading-snug">${title}</h3>
-              <p class="text-navy-500 text-sm mt-3 leading-relaxed line-clamp-3 whitespace-pre-wrap">${text}</p>
+              <p class="text-navy-500 text-sm mt-3 leading-relaxed line-clamp-3 whitespace-pre-wrap">${textPreview}</p>
               
               <div class="mt-auto pt-5">
                 <span class="inline-flex items-center gap-1.5 text-sm font-semibold text-navy-600 group-hover:text-gold-500 transition-colors">
