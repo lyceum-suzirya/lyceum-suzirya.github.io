@@ -157,7 +157,7 @@
       <a href="#top" class="nav-link hover:text-navy-800">Головна</a>
       <a href="#news" class="nav-link hover:text-navy-800">Новини</a>
       <a href="#about" class="nav-link hover:text-navy-800">Про ліцей</a>
-      <a href="#staff" class="nav-link hover:text-navy-800">Педагоги</a>
+      <a href="#staff" class="nav-link hover:text-navy-800">Керівництво</a>
       <a href="#students" class="nav-link hover:text-navy-800">Учням та батькам</a>
       <a href="#contacts" class="nav-link hover:text-navy-800">Контакти</a>
     </nav>
@@ -171,7 +171,7 @@
     <a href="#top" class="mobile-link py-3 border-b border-navy-50">Головна</a>
     <a href="#news" class="mobile-link py-3 border-b border-navy-50">Новини</a>
     <a href="#about" class="mobile-link py-3 border-b border-navy-50">Про ліцей</a>
-    <a href="#staff" class="mobile-link py-3 border-b border-navy-50">Педагоги</a>
+    <a href="#staff" class="mobile-link py-3 border-b border-navy-50">Керівництво</a>
     <a href="#students" class="mobile-link py-3 border-b border-navy-50">Учням та батькам</a>
     <a href="#contacts" class="mobile-link py-3">Контакти</a>
   </nav>
@@ -306,17 +306,18 @@
 <section id="staff" class="bg-white">
   <div class="max-w-6xl mx-auto px-5 sm:px-8 py-20 sm:py-28">
     <div class="text-center mb-14">
-      <span class="star-divider text-sm font-semibold tracking-widest text-gold-500 uppercase pl-1">Наша команда</span>
-      <h2 class="font-display font-semibold text-navy-800 text-3xl sm:text-4xl mt-3">Адміністрація та педагоги</h2>
-      <p class="text-navy-500 mt-3 max-w-xl mx-auto">Досвідчені фахівці, які щодня працюють заради знань і спокою наших учнів.</p>
+      <span class="star-divider text-sm font-semibold tracking-widest text-gold-500 uppercase pl-1">Керівництво</span>
+      <h2 class="font-display font-semibold text-navy-800 text-3xl sm:text-4xl mt-3">Директор ліцею</h2>
     </div>
 
     <div class="flex flex-wrap justify-center gap-6">
       
-      <a href="#" class="group block w-full sm:w-[320px] rounded-2xl border border-navy-100 bg-navy-50/40 p-8 text-center hover:shadow-xl hover:-translate-y-1 hover:border-gold-300 transition-all focus:outline-none focus:ring-2 focus:ring-gold-400">
-        <div class="w-24 h-24 mx-auto rounded-full bg-navy-700 text-gold-400 flex items-center justify-center text-4xl mb-6 group-hover:bg-gold-400 group-hover:text-navy-900 transition-colors">
-          <i class="fa-solid fa-user-tie"></i>
+      <a href="#" class="group block w-full sm:w-[360px] rounded-2xl border border-navy-100 bg-navy-50/40 p-8 text-center hover:shadow-xl hover:-translate-y-1 hover:border-gold-300 transition-all focus:outline-none focus:ring-2 focus:ring-gold-400">
+        <!-- Блок з фотографією -->
+        <div class="w-36 h-36 mx-auto rounded-full border-4 border-white shadow-md overflow-hidden mb-6 group-hover:border-gold-300 transition-colors bg-navy-100">
+          <img src="director.png" alt="Познякова Анжела Павлівна" class="w-full h-full object-cover object-top">
         </div>
+        
         <h3 class="font-display font-semibold text-navy-800 text-xl">Познякова Анжела Павлівна</h3>
         <p class="text-gold-600 text-sm font-medium mt-2">Директор ліцею</p>
         
@@ -526,7 +527,7 @@
 
     modal.classList.remove('hidden');
     modal.classList.add('flex');
-    document.body.style.overflow = 'hidden'; // prevent scrolling
+    document.body.style.overflow = 'hidden';
     
     setTimeout(() => {
       modal.classList.remove('opacity-0');
@@ -540,11 +541,10 @@
     setTimeout(() => {
       modal.classList.add('hidden');
       modal.classList.remove('flex');
-      document.body.style.overflow = 'auto'; // enable scrolling
+      document.body.style.overflow = 'auto';
     }, 300);
   }
 
-  // Close modal on clicking background or Escape key
   modal.addEventListener('click', (e) => {
     if (e.target === modal) closeModal();
   });
@@ -578,7 +578,7 @@
       const csvText = await response.text();
       const rows = csvToArray(csvText);
 
-      if (rows.length > 0) rows.shift(); // Remove header
+      if (rows.length > 0) rows.shift();
 
       const validRows = rows.filter(row => row.length >= 3 && row[1] && row[1].trim() !== '');
 
@@ -589,7 +589,7 @@
 
       validRows.reverse();
       const latestNews = validRows.slice(0, 6);
-      globalNewsData = latestNews; // Store for modal access
+      globalNewsData = latestNews;
 
       grid.innerHTML = '';
 
