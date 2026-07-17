@@ -491,7 +491,6 @@
   // News fetching logic
   const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTYeBxh7BFlHMGJmx3Ff6lqRzipftO-9GntccVdqz1sOlYbMaW81VEm3kheJIUV3BIlvRtEOG4XMUJB/pub?output=csv';
 
-  // Basic CSV parser to handle commas inside text fields correctly
   function csvToArray(text) {
     let p = '', row = [''], ret = [row], i = 0, r = 0, s = !0, l;
     for (l of text) {
@@ -511,14 +510,12 @@
   async function fetchNews() {
     const grid = document.getElementById('news-grid');
     try {
-      // Add cache-busting to the URL so we get the latest data
       const response = await fetch(csvUrl + '&t=' + new Date().getTime());
       const csvText = await response.text();
       const rows = csvToArray(csvText);
 
-      if (rows.length > 0) rows.shift(); // Remove header row
+      if (rows.length > 0) rows.shift(); // Remove header
 
-      // Filter out empty rows (checking if the title field exists)
       const validRows = rows.filter(row => row.length >= 3 && row[1] && row[1].trim() !== '');
 
       if (validRows.length === 0) {
@@ -526,8 +523,8 @@
         return;
       }
 
-      validRows.reverse(); // Newest first
-      const latestNews = validRows.slice(0, 6); // Show up to 6 latest news
+      validRows.reverse();
+      const latestNews = validRows.slice(0, 6);
 
       grid.innerHTML = '';
 
@@ -537,27 +534,26 @@
         const text = row[2] || '';
         const photoUrl = row[3] || '';
 
-        // Extract DD.MM.YYYY from timestamp
         const date = rawDate.split(' ')[0] || rawDate;
 
-        // Default placeholder image
         let imageHtml = `
-          <div class="h-48 bg-gradient-to-br from-navy-700 to-navy-900 flex items-center justify-center relative">
+          <div class="h-48 bg-gradient-to-br from-navy-700 to-navy-900 flex items-center justify-center relative shrink-0">
             <div class="diagonal-pattern absolute inset-0"></div>
             <i class="fa-solid fa-image text-4xl text-gold-400/80 relative"></i>
           </div>
         `;
 
-        // Convert Google Drive link to direct image URL if photo exists
         if (photoUrl && photoUrl.trim() !== '') {
           let directLink = photoUrl;
           let match = photoUrl.match(/id=([^&]+)/) || photoUrl.match(/d\/([a-zA-Z0-9-_]+)/);
           if (match && match[1]) {
-            directLink = `https://drive.google.com/uc?export=view&id=${match[1]}`;
+            // Використовуємо Thumbnail API для обходу блокування Google Drive
+            directLink = `https://drive.google.com/thumbnail?id=${match[1]}&sz=w1000`;
           }
+          // Додано onerror, щоб у разі помилки доступу показувалась красива заглушка, а не бите фото
           imageHtml = `
-            <div class="h-48 relative overflow-hidden bg-navy-100">
-              <img src="${directLink}" alt="Зображення новини" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+            <div class="h-48 relative overflow-hidden bg-navy-100 shrink-0">
+              <img src="${directLink}" alt="Зображення новини" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" onerror="this.parentElement.innerHTML='<div class=\\'h-full w-full flex items-center justify-center bg-gradient-to-br from-navy-700 to-navy-900\\'><i class=\\'fa-solid fa-image text-4xl text-gold-400/80\\'></i></div>'">
             </div>
           `;
         }
@@ -586,6 +582,3 @@
 
   document.addEventListener("DOMContentLoaded", fetchNews);
 </script>
-
-</body>
-</html>
