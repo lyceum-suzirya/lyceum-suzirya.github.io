@@ -455,6 +455,26 @@
   </div>
 </footer>
 
+<!-- MODAL FOR FULL NEWS -->
+<div id="news-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-navy-900/80 backdrop-blur-sm p-4 opacity-0 transition-opacity duration-300">
+  <div class="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl relative transform scale-95 transition-transform duration-300">
+    <button onclick="closeModal()" class="absolute top-4 right-4 w-9 h-9 flex items-center justify-center rounded-full bg-white/80 hover:bg-white text-navy-800 shadow-sm transition-colors z-10 focus:outline-none">
+      <i class="fa-solid fa-xmark text-lg"></i>
+    </button>
+    
+    <div class="overflow-y-auto w-full h-full rounded-2xl">
+      <div id="modal-image-container" class="w-full h-64 sm:h-80 bg-navy-100 hidden relative">
+        <img id="modal-image" src="" alt="Фото новини" class="w-full h-full object-cover">
+      </div>
+      <div class="p-6 sm:p-8">
+        <span id="modal-date" class="inline-flex items-center gap-2 text-xs font-semibold tracking-wide text-gold-600 uppercase mb-4"></span>
+        <h3 id="modal-title" class="font-display font-semibold text-navy-800 text-2xl sm:text-3xl leading-tight mb-6"></h3>
+        <div id="modal-text" class="text-navy-600 text-base leading-relaxed whitespace-pre-wrap"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
   // UI logic (Menu & Year)
   document.getElementById('year').textContent = new Date().getFullYear();
@@ -486,6 +506,68 @@
   menuBtn.addEventListener('click', toggleMenu);
   document.querySelectorAll('.mobile-link').forEach(link => {
     link.addEventListener('click', closeMenu);
+  });
+
+  // Modal logic
+  const modal = document.getElementById('news-modal');
+  let globalNewsData = [];
+
+  function openModal(index) {
+    const row = globalNewsData[index];
+    if (!row) return;
+
+    const rawDate = row[0] || '';
+    const title = row[1] || '';
+    const text = row[2] || '';
+    const photoUrl = row[3] || '';
+
+    const date = rawDate.split(' ')[0] || rawDate;
+
+    document.getElementById('modal-date').innerHTML = `<i class="fa-regular fa-calendar"></i> ${date}`;
+    document.getElementById('modal-title').textContent = title;
+    document.getElementById('modal-text').textContent = text;
+
+    const imgContainer = document.getElementById('modal-image-container');
+    const imgEl = document.getElementById('modal-image');
+
+    if (photoUrl && photoUrl.trim() !== '') {
+      let match = photoUrl.match(/id=([^&]+)/) || photoUrl.match(/d\/([a-zA-Z0-9-_]+)/);
+      if (match && match[1]) {
+        imgEl.src = `https://drive.google.com/thumbnail?id=${match[1]}&sz=w1000`;
+        imgContainer.classList.remove('hidden');
+      } else {
+        imgContainer.classList.add('hidden');
+      }
+    } else {
+      imgContainer.classList.add('hidden');
+    }
+
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    document.body.style.overflow = 'hidden'; // prevent scrolling
+    
+    setTimeout(() => {
+      modal.classList.remove('opacity-0');
+      modal.firstElementChild.classList.remove('scale-95');
+    }, 10);
+  }
+
+  function closeModal() {
+    modal.classList.add('opacity-0');
+    modal.firstElementChild.classList.add('scale-95');
+    setTimeout(() => {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      document.body.style.overflow = 'auto'; // enable scrolling
+    }, 300);
+  }
+
+  // Close modal on clicking background or Escape key
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeModal();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !modal.classList.contains('hidden')) closeModal();
   });
 
   // News fetching logic
@@ -525,10 +607,11 @@
 
       validRows.reverse();
       const latestNews = validRows.slice(0, 6);
+      globalNewsData = latestNews; // Store for modal access
 
       grid.innerHTML = '';
 
-      latestNews.forEach(row => {
+      latestNews.forEach((row, index) => {
         const rawDate = row[0] || '';
         const title = row[1] || 'Без заголовка';
         const text = row[2] || '';
@@ -547,10 +630,8 @@
           let directLink = photoUrl;
           let match = photoUrl.match(/id=([^&]+)/) || photoUrl.match(/d\/([a-zA-Z0-9-_]+)/);
           if (match && match[1]) {
-            // Використовуємо Thumbnail API для обходу блокування Google Drive
             directLink = `https://drive.google.com/thumbnail?id=${match[1]}&sz=w1000`;
           }
-          // Додано onerror, щоб у разі помилки доступу показувалась красива заглушка, а не бите фото
           imageHtml = `
             <div class="h-48 relative overflow-hidden bg-navy-100 shrink-0">
               <img src="${directLink}" alt="Зображення новини" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" onerror="this.parentElement.innerHTML='<div class=\\'h-full w-full flex items-center justify-center bg-gradient-to-br from-navy-700 to-navy-900\\'><i class=\\'fa-solid fa-image text-4xl text-gold-400/80\\'></i></div>'">
@@ -559,7 +640,7 @@
         }
 
         const card = `
-          <article class="group rounded-2xl border border-navy-100 bg-white overflow-hidden shadow-sm hover:shadow-lg transition-all flex flex-col h-full">
+          <article onclick="openModal(${index})" class="group cursor-pointer rounded-2xl border border-navy-100 bg-white overflow-hidden shadow-sm hover:shadow-lg transition-all flex flex-col h-full focus-within:ring-2 focus-within:ring-gold-400">
             ${imageHtml}
             <div class="p-6 flex-1 flex flex-col">
               <span class="inline-flex items-center gap-2 text-xs font-semibold tracking-wide text-gold-600 uppercase">
@@ -568,6 +649,12 @@
               </span>
               <h3 class="font-display font-semibold text-navy-800 text-lg mt-3 leading-snug">${title}</h3>
               <p class="text-navy-500 text-sm mt-3 leading-relaxed line-clamp-3 whitespace-pre-wrap">${text}</p>
+              
+              <div class="mt-auto pt-5">
+                <span class="inline-flex items-center gap-1.5 text-sm font-semibold text-navy-600 group-hover:text-gold-500 transition-colors">
+                  Читати далі <i class="fa-solid fa-arrow-right text-xs group-hover:translate-x-1 transition-transform"></i>
+                </span>
+              </div>
             </div>
           </article>
         `;
@@ -582,3 +669,6 @@
 
   document.addEventListener("DOMContentLoaded", fetchNews);
 </script>
+
+</body>
+</html>
