@@ -499,7 +499,7 @@
     link.addEventListener('click', closeMenu);
   });
 
-  // Escaping and Linkifying functions
+  // Escaping and Linkifying functions with YouTube Embed Support
   function escapeHTML(str) {
     if (!str) return '';
     return str.replace(/[&<>'"]/g, tag => ({
@@ -514,7 +514,17 @@
   function linkify(text) {
     const escapedText = escapeHTML(text);
     const urlRegex = /(https?:\/\/[^\s]+)/g;
+    
     return escapedText.replace(urlRegex, function(url) {
+      // Перевіряємо, чи є це посилання на YouTube
+      const ytMatch = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i);
+      
+      // Якщо це YouTube — вбудовуємо плеєр
+      if (ytMatch && ytMatch[1]) {
+        return '<div class="my-5 relative w-full overflow-hidden rounded-xl pt-[56.25%] shadow-md"><iframe class="absolute top-0 left-0 w-full h-full" src="https://www.youtube.com/embed/' + ytMatch[1] + '" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>';
+      }
+      
+      // Якщо це звичайне посилання — робимо клікабельним
       return '<a href="' + url + '" target="_blank" class="text-blue-600 hover:text-blue-800 underline break-all font-medium">' + url + '</a>';
     });
   }
@@ -536,7 +546,8 @@
 
     document.getElementById('modal-date').innerHTML = `<i class="fa-regular fa-calendar"></i> ${date}`;
     document.getElementById('modal-title').textContent = title;
-    // Injecting HTML here so the linkify a-tags work
+    
+    // Injecting HTML here so the linkify a-tags and YouTube iframes work
     document.getElementById('modal-text').innerHTML = linkify(rawText);
 
     const imgContainer = document.getElementById('modal-image-container');
@@ -570,6 +581,10 @@
     setTimeout(() => {
       modal.classList.add('hidden');
       modal.classList.remove('flex');
+      
+      // Зупиняємо відео при закритті модального вікна (очищаємо вміст)
+      document.getElementById('modal-text').innerHTML = '';
+      
       document.body.style.overflow = 'auto';
     }, 300);
   }
